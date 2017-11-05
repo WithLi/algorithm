@@ -1,0 +1,377 @@
+package 算法;
+import java.util.Scanner;
+
+public class Redblacktree{   /*红黑树*/
+	private final Node NIL = new Node(null,null,null,Color.BLACK,-1);  
+    private Node root;  
+    
+    
+    enum Color {    //枚举颜色
+        RED,BLACK  
+    }  
+    public Redblacktree() {  
+        root = NIL;  
+    }  
+    public Node getNIL() {  
+        return NIL;  
+    }  
+    public Redblacktree(Node  root) {  
+        this.root = root;  
+    } 
+  
+    class Node{   //定义树结点结构
+    	private Node left;
+    	private Node right;
+    	private Node parent;
+    	private Color color;
+    	private int value;
+    	public Node(Node left,Node right,Node parent,Color color,int value){
+    		super();
+    		 this.left = left;  
+    	     this.right = right;  
+    	     this.parent = parent;  
+    	     this.color = color;  
+    	     this.value = value;  
+    	}
+    	  public Node() {  
+    	    }  
+    	      
+    	    public Node(int value) {  
+    	        this(null,null,null,null,value);  
+    	    }  
+    	  
+    	    public Node getLeft() {  
+    	        return left;  
+    	    }  
+    	  
+    	    public void setLeft(Node left) {  
+    	        this.left = left;  
+    	    }  
+    	  
+    	    public Node getRight() {  
+    	        return right;  
+    	    }  
+    	  
+    	    public void setRight(Node right) {  
+    	        this.right = right;  
+    	    }  
+    	  
+    	    public Node getParent() {  
+    	        return parent;  
+    	    }  
+    	  
+    	    public void setParent(Node parent) {  
+    	        this.parent = parent;  
+    	    }  
+    	  
+    	    public Color getColor() {  
+    	        return color;  
+    	    }  
+    	  
+    	    public void setColor(Color color) {  
+    	        this.color = color;  
+    	    }  
+    	  
+    	    public int getValue() {  
+    	        return value;  
+    	    }  
+    	  
+    	    public void setValue(int value) {  
+    	        this.value = value;  
+    	    }  
+    }
+    private void leftRotate(Node node){    //左旋
+    	Node rightNode = node.getRight();   //获取右结点a
+    	
+    	node.setRight(rightNode.getLeft());  //将右结点a的左结点传给Node的右结点b
+    	
+        if(rightNode.getLeft()!=NIL){
+        	rightNode.getLeft().setParent(node);  //将Node的右结点b 指向node
+        }
+        rightNode.setParent(node.getParent()); //将node的父结点改为右结点a的父结点
+        
+        if(node.getParent() == NIL){    //情况1，如果node 父结点为空，则讲y设为根结点
+        	root = rightNode;
+        }else if(node == node.getParent().getLeft()){//情况2，如果node 的父结点的左结点
+        	node.getParent().setLeft(rightNode);   //将右结点a设为父结点的右结点
+        }else{
+        	node.getParent().setRight(rightNode);//将右结点a设为父结点的左结点
+        }
+        
+        rightNode.setLeft(node);
+        node.setParent(rightNode);
+    }
+    private void rightRotate(Node node){  //右旋
+    	Node leftNode = node.getLeft();   //获取左结点a
+    	
+    	node.setLeft(leftNode.getRight());  //将左结点a的右结点设置node的左结点b
+    	
+    	 if(leftNode.getRight()!=NIL){
+         	leftNode.getRight().setParent(node);  //将Node的右结点b 指向node
+         }
+    	 leftNode.setParent(node.getParent());  //将NOde的父结点  设置为左结点a父结点
+    	 if (node.getParent() == NIL) {    //情况1，如果node为父结点为空，将左结点设为跟结点
+             root = leftNode;  
+         } else if (node == node.getParent().getLeft()) {   //情况二，node为父节点的左结点
+             node.getParent().setLeft(leftNode);  
+         } else {  //情况三，node为父节点的右结点
+             node.getParent().setRight(leftNode);  
+         }  
+           
+         leftNode.setRight(node);  
+         node.setParent(leftNode);  
+    	 
+    }
+    //插入结点
+    public void rbInsert(Node node){
+    	Node previous = NIL;    //先驱结点
+    	Node temp = root;    //根节点
+    	
+    	while(temp != NIL){    //当根节点不为哨兵
+    		previous = temp;
+    		if(temp.getValue() < node.getValue()){  //结点值大于temp进入右结点否则进入左结点
+    			temp = temp.getRight();  
+    		}else{
+    			temp = temp.getLeft();
+    		}
+    	}
+    	node.setParent(previous);  //previousw为node 的父结点
+    	if(previous == NIL){      //如果previous 为哨兵，则node为根节点
+    		root = node;
+    		root.setParent(NIL);
+    	}else if (previous.getValue() > node.getValue()){  //p判断node 为previous为左结点还是右结点
+    		previous.setLeft(node);
+    	}else{
+    		previous.setRight(node);
+    	}
+    	
+    	node.setLeft(NIL);
+    	node.setRight(NIL);
+    	node.setColor(Color.RED);
+    	rb_fixup(node);
+    }
+    private void rb_fixup(Node node){
+    	while(node.getParent().getColor() == Color.RED){
+    		if(node.getParent() == node.getParent().getParent().getLeft()){  //如果父亲为爷爷的左结点
+    			Node rightNuncle = node.getParent().getParent().getRight();  //叔叔结点
+    			
+    			if(rightNuncle.getColor() == Color.RED){ //情况1，叔叔结点为红色
+    				rightNuncle.setColor(Color.BLACK);//将“父节点”设为黑色
+    				node.getParent().setColor(Color.BLACK);//将“叔叔节点”设为黑色。
+    				node.getParent().getParent().setColor(Color.RED);//将“祖父节点”设为“红色”。
+    				node = node.getParent().getParent();//) 将“祖父节点”设为“当前节点”(红色节点)；
+    			}else if(node == node.getParent().getRight()){  //情况2 当前节点的父节点是红色，叔叔节点是黑色，且当前节点是其父节点的右孩子
+    				node = node.getParent();  //(01) 将“父节点”作为“新的当前节点”
+    				leftRotate(node); //左旋
+    			}else{
+    				node.getParent().setColor(Color.BLACK);
+    				node.getParent().getParent().setColor(Color.RED);
+    				rightRotate(node.getParent().getParent());
+    			}
+    			
+    		}else{        //结点的父亲为右结点
+    			Node leftNuncle = node.getParent().getParent().getLeft();
+    			
+    			if(leftNuncle.getColor() == Color.RED){ //情况4
+    				
+    				leftNuncle.setColor(Color.BLACK);//将“父节点”设为黑色
+    				node.getParent().setColor(Color.BLACK);//将“叔叔节点”设为黑色。
+    				node.getParent().getParent().setColor(Color.RED);//将“祖父节点”设为“红色”。
+    				node = node.getParent().getParent();
+    			}else if(node == node.getParent().getLeft()){  //情况5
+    				node = node.getParent();  //(01) 将“父节点”作为“新的当前节点”
+    				rightRotate(node);
+    			}else{  //情况6
+    				
+    				node.getParent().setColor(Color.BLACK);  
+                    node.getParent().getParent().setColor(Color.RED);  
+                    leftRotate(node.getParent().getParent()); 
+    			}
+    			
+    		}
+    	}
+    	
+    	root.setColor(Color.BLACK);
+    }
+    
+    
+    //中序遍历红黑树
+    public void showTree(){
+    	inOrderTraverse(root);
+    }
+    public void inOrderTraverse(Node node){
+    	
+    	if(node != NIL){
+    		inOrderTraverse(node.getLeft());
+    		System.out.println("节点："+node.getValue() + "的颜色为：" + node.getColor());
+    		inOrderTraverse(node.getRight());
+    	}
+    	
+    }
+    //查找结点
+    public Node serach(int data){
+    	Node temp = root;
+		
+    	while(temp!=NIL){
+    		if(temp.getValue() == data){
+    			return temp; 
+    		}else if(data < temp.getValue()){
+    			temp = temp.getLeft();
+    		}else{
+    			temp = temp.getRight();
+    		}
+    	}
+		return null;
+    }
+    //查找结点node的后继结点
+    public Node successor(Node node) {  
+        
+        Node rightChild = node.getRight();  
+        if  (rightChild != NIL) {  
+            Node previous = null;  
+            while (rightChild != NIL) {  
+                previous = rightChild;  
+                rightChild = rightChild.getLeft();  
+            }  
+            return previous;  
+        } else {  
+              
+            Node parent = node.getParent();  
+            while (parent != NIL && node != parent.getLeft()) {  
+                node = parent;  
+                parent = parent.getParent();  
+            }  
+              
+            return parent;  
+                          
+        }  
+  
+    }  
+   //删除结点
+    public Node rbdelete(int data){
+    	Node node = serach(data);
+    	Node temp = NIL;
+    	Node child = NIL;
+    	if(node == null){
+    		return null;
+    	}else{  
+    		if(node.getLeft() == NIL || node.getRight() == NIL){// 若node的左孩子” 或 “node的右孩子”为空，则将“node”赋值给 “temp”；
+    			temp = node;
+    		}else{  // 否则，将“z的后继节点”赋值给 “temp”。
+    			temp = successor(node);
+    		}
+    		
+    		if(temp.getLeft() != NIL){
+    			child = temp.getLeft();
+    		}else{
+    			child = temp.getRight();
+    		}
+    		
+    		child.setParent(temp.getParent());
+    		
+    		if(temp.getParent() == NIL){
+    			root = child;
+    		}else if (temp == temp.getParent().getLeft()){
+    			temp.getParent().setLeft(child);
+    		}else{
+    			temp.getParent().setRight(child);
+    		}
+    		
+    		if(temp != node){
+    			node.setValue(temp.getValue());
+    		}
+    		
+    		if(temp.getColor() == Color.BLACK){
+    			rb_delete_fixup(child);
+    		}
+    		return temp;
+    	}	
+    }
+    //删除节点后的调整  
+    private void rb_delete_fixup(Node node) {  
+          
+        while (node != root && node.getColor() == Color.BLACK) {  
+              
+            if (node == node.getParent().getLeft()) {  
+                  
+                Node rightBrother = node.getParent().getRight();  
+                if (rightBrother.getColor() == Color.RED) {          //case 1 node节点为左孩子，node节点的兄弟为RED  
+                    rightBrother.setColor(Color.BLACK);  
+                    node.getParent().setColor(Color.RED);  
+                    leftRotate(node.getParent());  
+                    rightBrother = node.getParent().getRight();  
+                }  
+                  
+                if (rightBrother.getLeft().getColor() == Color.BLACK && rightBrother.getRight().getColor() == Color.BLACK) {  
+                    rightBrother.setColor(Color.RED);  
+                    node = node.getParent();  
+                } else if (rightBrother.getRight().getColor() == Color.BLACK) {  
+                    rightBrother.getLeft().setColor(Color.BLACK);  
+                    rightBrother.setColor(Color.RED);  
+                    rightRotate(rightBrother);  
+                    rightBrother = node.getParent().getRight();  
+                } else {  
+                    rightBrother.setColor(node.getParent().getColor());  
+                    node.getParent().setColor(Color.BLACK);  
+                    rightBrother.getRight().setColor(Color.BLACK);  
+                    leftRotate(node.getParent());  
+                    node = root;  
+                }  
+                  
+                  
+            } else {  
+                  
+                Node leftBrother = node.getParent().getLeft();  
+                if (leftBrother.getColor() == Color.RED) {  
+                    leftBrother.setColor(Color.BLACK);  
+                    node.getParent().setColor(Color.RED);  
+                    rightRotate(node.getParent());  
+                    leftBrother = node.getParent().getLeft();  
+                }   
+                  
+                if (leftBrother.getLeft().getColor() == Color.BLACK && leftBrother.getRight().getColor() == Color.BLACK) {  
+                    leftBrother.setColor(Color.RED);  
+                    node = node.getParent();  
+                                                      
+                } else if (leftBrother.getLeft().getColor() == Color.BLACK) {  
+                      
+                    leftBrother.setColor(Color.RED);  
+                    leftBrother.getRight().setColor(Color.BLACK);  
+                    leftRotate(leftBrother);  
+                    leftBrother = node.getParent().getLeft();  
+                      
+                } else {  
+                      
+                    leftBrother.setColor(node.getParent().getColor());  
+                    node.getParent().setColor(Color.BLACK);  
+                    leftBrother.getLeft().setColor(Color.BLACK);  
+                    rightRotate(node.getParent());  
+                    node = root;  
+                                                              
+                }  
+                                  
+            }  
+                      
+        }  
+              
+        node.setColor(Color.BLACK);  
+    }
+    public static void main(String[] args) {
+    	 
+    	Redblacktree rbTree = new Redblacktree();  
+    	rbTree.rbInsert(rbTree.new Node(20));
+        rbTree.rbInsert(rbTree.new Node(5));  
+        rbTree.rbInsert(rbTree.new Node(3));  
+        rbTree.rbInsert(rbTree.new Node(10));  
+        /*rbTree.rbInsert(rbTree.new Node(14));  
+        rbTree.rbInsert(rbTree.new Node(8));
+        rbTree.rbInsert(rbTree.new Node(6));  
+        rbTree.rbInsert(rbTree.new Node(32));  
+        rbTree.rbInsert(rbTree.new Node(45));  */
+        
+        //rbTree.rbdelete(19);  
+          
+        rbTree.showTree();  
+          
+	}
+}
